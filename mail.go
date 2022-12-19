@@ -9,38 +9,38 @@ import (
 )
 
 type SmtpConfig struct {
-	hostname string
-	port     int
-	username string
-	password string
+	Hostname string
+	Port     int
+	Username string
+	Password string
 
 	// Max Mustermann <max.mustermann@musterfirma.com>
-	senderMail string
-	replyMail  string
+	SenderMail string
+	ReplyMail  string
 }
 
 func SendMail(config *SmtpConfig, recipEmail string, subject string, text string) error {
 
-	auth := smtp.PlainAuth("", config.username, config.password, config.hostname)
-	msg := "From: " + config.replyMail + "\nTo: <" + recipEmail + ">\nSubject: " + subject + "\n\n" + text
+	auth := smtp.PlainAuth("", config.Username, config.Password, config.Hostname)
+	msg := "From: " + config.ReplyMail + "\nTo: <" + recipEmail + ">\nSubject: " + subject + "\nContent-Type: text/html; charset=\"UTF-8\";\n\n" + text
 
-	conn, err := net.Dial("tcp", fmt.Sprint(config.hostname, ":", config.port))
+	conn, err := net.Dial("tcp", fmt.Sprint(config.Hostname, ":", config.Port))
 	if err != nil {
 		return err
 	}
-	tlsConn := tls.Client(conn, &tls.Config{ServerName: config.hostname})
+	tlsConn := tls.Client(conn, &tls.Config{ServerName: config.Hostname})
 
-	client, err := smtp.NewClient(tlsConn, config.hostname)
+	client, err := smtp.NewClient(tlsConn, config.Hostname)
 	if err != nil {
 		return err
 	}
-	client.Hello("stud.hwr-berlin.de")
+	client.Hello(config.Hostname)
 
 	err = client.Auth(auth)
 	if err != nil {
 		return err
 	}
-	err = client.Mail(config.senderMail)
+	err = client.Mail(config.SenderMail)
 	if err != nil {
 		return err
 	}
