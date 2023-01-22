@@ -15,6 +15,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
+	expiremap "github.com/nursik/go-expire-map"
 )
 
 func contains[C comparable](s []C, e C) bool {
@@ -37,12 +38,25 @@ func listenButtons(s *discordgo.Session, m *discordgo.InteractionCreate) {
 			s.InteractionRespond(m.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Du bist bereits verifiziert!",
+					Content: "Du bist bereits verifiziert.",
 					Flags:   discordgo.MessageFlagsEphemeral,
 				},
 			})
 			return
 		}
+
+		_, ok := mailExpirationMap.Get(m.Member.User.ID)
+		if ok {
+			s.InteractionRespond(m.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Probiere es bitte später erneut.",
+					Flags:   discordgo.MessageFlagsEphemeral,
+				},
+			})
+			return
+		}
+
 		OpenVerificationModal(s, m)
 	case "leave-discord":
 		fmt.Println("Kick discord")
@@ -115,7 +129,7 @@ func handleVerificationModal(s *discordgo.Session, m *discordgo.InteractionCreat
 	token := userVerification.GenerateToken(&VerficationRequest{
 		guildId:    m.GuildID,
 		userId:     m.Member.User.ID,
-		expiringAt: time.Now().Unix() + 1000*60*5,
+		expiringAt: time.Now().Add(time.Duration(5) * time.Minute),
 	})
 	vURLBuilder := new(strings.Builder)
 	err = verificationURL.Execute(vURLBuilder, token)
@@ -134,6 +148,7 @@ func handleVerificationModal(s *discordgo.Session, m *discordgo.InteractionCreat
 
 	// Sends email to the email address
 	err = SendMail(smtpConfig, email, emailSubject.String(), emailBody.String())
+	mailExpirationMap.Set(m.Member.User.ID, true, time.Duration(1)*time.Minute)
 	fmt.Println("Sending email to", email, "...")
 	if err != nil {
 		fmt.Println("Failed to send email", err)
@@ -247,6 +262,8 @@ var emailSubjectTemplate *template.Template
 var verificationURL *template.Template
 var userVerification UserVerification
 
+var mailExpirationMap *expiremap.ExpireMap
+
 func main() {
 	godotenv.Load(".env")
 
@@ -280,6 +297,7 @@ func main() {
 	}
 
 	userVerification = NewMapUserVerification()
+	mailExpirationMap = expiremap.New()
 
 	session, err := discordgo.New(os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
@@ -295,11 +313,16 @@ func main() {
 		if len(token) != 0 {
 			request, err := userVerification.VerifyToken(token)
 			if err != nil {
+				fmt.Println(err)
 				return
 			}
 			session.GuildMemberRoleAdd(request.guildId, request.userId, os.Getenv("VERIFICATION_ROLE"))
 		}
-
+		if r.URL.Path == "/" {
+			w.Header().Add("Location", "https://discord.gg/"+os.Getenv("DISCORD_INVITE"))
+			w.WriteHeader(301)
+			fmt.Println("Redirecting", token, "to "+"https://discord.gg/"+os.Getenv("DISCORD_INVITE"))
+		}
 	})
 
 	go func() {
@@ -370,4 +393,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	userVerification.Close()
+	mailExpirationMap.Close()
 }

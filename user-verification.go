@@ -5,41 +5,51 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+
+	expiremap "github.com/nursik/go-expire-map"
 )
 
 type UserVerification interface {
 	GenerateToken(request *VerficationRequest) (token string)
 
 	VerifyToken(token string) (request *VerficationRequest, err error)
+
+	Close()
 }
 
 type VerficationRequest struct {
 	guildId    string
 	userId     string
-	expiringAt int64
+	expiringAt time.Time
 }
 
 type MapUserVerification struct {
-	tokens map[string]*VerficationRequest
+	/* [string] *VerificationRequest */
+	tokens *expiremap.ExpireMap
 }
 
 func NewMapUserVerification() UserVerification {
 	return &MapUserVerification{
-		tokens: make(map[string]*VerficationRequest),
+		tokens: expiremap.New(),
 	}
 }
 
-func (s *MapUserVerification) GenerateToken(reqest *VerficationRequest) string {
+func (s *MapUserVerification) GenerateToken(request *VerficationRequest) string {
 	t := strconv.FormatUint(rand.Uint64(), 16) + strconv.FormatUint(rand.Uint64(), 16)
-	s.tokens[t] = reqest
+	fmt.Println("Token generated: "+t+". Which expire in", time.Until(request.expiringAt).Round(time.Second))
+	s.tokens.Set(t, request, time.Until(request.expiringAt))
 	return t
 }
 
 func (s *MapUserVerification) VerifyToken(token string) (request *VerficationRequest, err error) {
-	request = s.tokens[token]
-	if request == nil || request.expiringAt < time.Now().Unix() {
-		return nil, fmt.Errorf("cannot find token")
+	value, ok := s.tokens.Get(token)
+	if !ok {
+		return nil, fmt.Errorf("cannot find token %s", token)
 	}
-	delete(s.tokens, token)
-	return request, nil
+	s.tokens.Delete(token)
+	return value.(*VerficationRequest), nil
+}
+
+func (c *MapUserVerification) Close() {
+	c.tokens.Close()
 }
