@@ -17,7 +17,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func contains(s []string, e string) bool {
+func contains[C comparable](s []C, e C) bool {
 	for _, a := range s {
 		if a == e {
 			return true
