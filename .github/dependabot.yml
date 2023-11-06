@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    assignees: 
+      - "Lxcasx"
+      - "DevCyntrix"
+    reviewers:
+      - "Lxcasx"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
+    schedule:
+      interval: "daily"
