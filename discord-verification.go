@@ -303,7 +303,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	session.Identify.Intents = discordgo.IntentsAll
+	session.Identify.Intents = discordgo.IntentsGuildMessages
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
