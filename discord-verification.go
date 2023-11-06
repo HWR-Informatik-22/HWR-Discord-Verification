@@ -265,7 +265,7 @@ var userVerification UserVerification
 var mailExpirationMap *expiremap.ExpireMap
 
 func main() {
-	godotenv.Load(".env")
+	godotenv.Load()
 
 	rand.Seed(time.Now().Unix())
 
