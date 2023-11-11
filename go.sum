@@ -2,8 +2,8 @@ github.com/bwmarrin/discordgo v0.27.1 h1:ib9AIc/dom1E/fSIulrBwnez0CToJE113ZGt4Ho
 github.com/bwmarrin/discordgo v0.27.1/go.mod h1:NJZpH+1AfhIcyQsPeuBKsUtYrRnjkyu0kIVMCHkZtRY=
 github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
-github.com/joho/godotenv v1.4.0 h1:3l4+N6zfMWnkbPEXKng2o2/MR5mSwTrBih4ZEkkz1lg=
-github.com/joho/godotenv v1.4.0/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
+github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
+github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
 github.com/nursik/go-expire-map v1.1.0 h1:C+OJ81JtHDSPJXfuu0g3e8RRjHLd5of8dVzyfDOB9KY=
 github.com/nursik/go-expire-map v1.1.0/go.mod h1:wdQsai5n32Uw1IuVXXZoopePGCFh5vb0Dka/TRcboHs=
 github.com/nursik/go-ordered-set v0.0.0-20190626022851-0e8872c36517 h1:jau4pavdQo5lHeVTjZEGrm4+zvVGZj8SFQt4awsLLXE=
